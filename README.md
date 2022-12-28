@@ -7,8 +7,10 @@
 
 
 ### 仮想環境
-- source env/Scripts/activate
-- pip install -r requirements.txt
+- 仮想環境作成時の参考
+  - source env/Scripts/activate
+  - pip install -r requirements.txt
+
  
  
 ### 実行スクリプト
