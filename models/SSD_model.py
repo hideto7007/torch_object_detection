@@ -24,8 +24,8 @@ def make_vgg():
     in_channels = 3  # 色チャネル数
 
     # vggモジュールで使用する畳み込み層やマックスプーリングのチャネル数
-    cfg = [8, 8, 'M', 16, 16, 'M', 32, 32,
-           32, 'MC', 64, 64, 64, 'M', 128, 128, 128]
+    cfg = [64, 64, 'M', 128, 128, 'M', 256, 256,
+           256, 'MC', 512, 512, 512, 'M', 512, 512, 512]
 
     for v in cfg:
         if v == 'M':
@@ -40,8 +40,8 @@ def make_vgg():
             in_channels = v
 
     pool5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
-    conv6 = nn.Conv2d(256, 512, kernel_size=3, padding=6, dilation=6)
-    conv7 = nn.Conv2d(512, 512, kernel_size=1)
+    conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
+    conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
     layers += [pool5, conv6,
                nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
     return nn.ModuleList(layers)
@@ -55,10 +55,10 @@ def make_vgg():
 # 8層にわたる、extrasモジュールを作成
 def make_extras():
     layers = []
-    in_channels = 512  # vggモジュールから出力された、extraに入力される画像チャネル数
+    in_channels = 1024  # vggモジュールから出力された、extraに入力される画像チャネル数
 
     # extraモジュールの畳み込み層のチャネル数を設定するコンフィギュレーション
-    cfg = [128, 256, 64, 128, 64, 128, 64, 128]
+    cfg = [256, 512, 128, 256, 128, 256, 128, 256]
 
     layers += [nn.Conv2d(in_channels, cfg[0], kernel_size=(1))]
     layers += [nn.Conv2d(cfg[0], cfg[1], kernel_size=(3), stride=2, padding=1)]
@@ -68,9 +68,6 @@ def make_extras():
     layers += [nn.Conv2d(cfg[4], cfg[5], kernel_size=(3))]
     layers += [nn.Conv2d(cfg[5], cfg[6], kernel_size=(1))]
     layers += [nn.Conv2d(cfg[6], cfg[7], kernel_size=(3))]
-    
-    # 活性化関数のReLUは今回はSSDモデルの順伝搬のなかで用意することにし、
-    # extraモジュールでは用意していません
 
     return nn.ModuleList(layers)
 
@@ -85,45 +82,45 @@ def make_extras():
 # デフォルトボックスに対する各クラスの信頼度confidenceを出力するconf_layersを作成
 
 
-def make_loc_conf(num_classes=21, bbox_aspect_num=[2, 3, 3, 3, 2, 2]):
+def make_loc_conf(num_classes=21, bbox_aspect_num=[4, 6, 6, 6, 4, 4]):
 
     loc_layers = []
     conf_layers = []
 
     # VGGの22層目、conv4_3（source1）に対する畳み込み層
-    loc_layers += [nn.Conv2d(256, bbox_aspect_num[0]
+    loc_layers += [nn.Conv2d(512, bbox_aspect_num[0]
                              * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(256, bbox_aspect_num[0]
+    conf_layers += [nn.Conv2d(512, bbox_aspect_num[0]
                               * num_classes, kernel_size=3, padding=1)]
 
     # VGGの最終層（source2）に対する畳み込み層
-    loc_layers += [nn.Conv2d(512, bbox_aspect_num[1]
+    loc_layers += [nn.Conv2d(1024, bbox_aspect_num[1]
                              * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(512, bbox_aspect_num[1]
+    conf_layers += [nn.Conv2d(1024, bbox_aspect_num[1]
                               * num_classes, kernel_size=3, padding=1)]
 
     # extraの（source3）に対する畳み込み層
-    loc_layers += [nn.Conv2d(256, bbox_aspect_num[2]
+    loc_layers += [nn.Conv2d(512, bbox_aspect_num[2]
                              * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(256, bbox_aspect_num[2]
+    conf_layers += [nn.Conv2d(512, bbox_aspect_num[2]
                               * num_classes, kernel_size=3, padding=1)]
 
     # extraの（source4）に対する畳み込み層
-    loc_layers += [nn.Conv2d(128, bbox_aspect_num[3]
+    loc_layers += [nn.Conv2d(256, bbox_aspect_num[3]
                              * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(128, bbox_aspect_num[3]
+    conf_layers += [nn.Conv2d(256, bbox_aspect_num[3]
                               * num_classes, kernel_size=3, padding=1)]
 
     # extraの（source5）に対する畳み込み層
-    loc_layers += [nn.Conv2d(128, bbox_aspect_num[4]
+    loc_layers += [nn.Conv2d(256, bbox_aspect_num[4]
                              * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(128, bbox_aspect_num[4]
+    conf_layers += [nn.Conv2d(256, bbox_aspect_num[4]
                               * num_classes, kernel_size=3, padding=1)]
 
     # extraの（source6）に対する畳み込み層
-    loc_layers += [nn.Conv2d(128, bbox_aspect_num[5]
+    loc_layers += [nn.Conv2d(256, bbox_aspect_num[5]
                              * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(128, bbox_aspect_num[5]
+    conf_layers += [nn.Conv2d(256, bbox_aspect_num[5]
                               * num_classes, kernel_size=3, padding=1)]
 
     return nn.ModuleList(loc_layers), nn.ModuleList(conf_layers)
@@ -179,13 +176,13 @@ class DBox(object):
         self.feature_maps = cfg['feature_maps']
         self.num_priors = len(cfg["feature_maps"])  # sourceの個数=6
         self.steps = cfg['steps']  # [8, 16, …] DBoxのピクセルサイズ
-        
+
         self.min_sizes = cfg['min_sizes']
-        # [30, 60, …] 小さい正方形のDBoxのピクセルサイズ（正確には面積）
-        
+        # [30, 60, …] 小さい正方形のDBoxのピクセルサイズ(正確には面積)
+
         self.max_sizes = cfg['max_sizes']
-        # [60, 111, …] 大きい正方形のDBoxのピクセルサイズ（正確には面積）
-        
+        # [60, 111, …] 大きい正方形のDBoxのピクセルサイズ(正確には面積)
+
         self.aspect_ratios = cfg['aspect_ratios']  # 長方形のDBoxのアスペクト比
 
     def make_dbox_list(self):
@@ -220,12 +217,11 @@ class DBox(object):
         # DBoxをテンソルに変換 torch.Size([8732, 4])
         output = torch.Tensor(mean).view(-1, 4)
 
-        # DBoxが画像の外にはみ出るのを防ぐため、大きさを最小0、最大1にする
+        # DBoxの大きさが1を超えている場合は1にする
         output.clamp_(max=1, min=0)
 
         return output
-    
-# 動作の確認
+
 
 
 # DBox作成
@@ -242,14 +238,12 @@ dbox_list = dbox.make_dbox_list()
 def decode(loc, dbox_list):
     """
     オフセット情報を使い、DBoxをBBoxに変換する。
-
     Parameters
     ----------
     loc:  [8732,4]
         SSDモデルで推論するオフセット情報。
     dbox_list: [8732,4]
         DBoxの情報
-
     Returns
     -------
     boxes : [xmin, ymin, xmax, ymax]
@@ -278,14 +272,12 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
     """
     Non-Maximum Suppressionを行う関数。
     boxesのうち被り過ぎ（overlap以上）のBBoxを削除する。
-
     Parameters
     ----------
     boxes : [確信度閾値（0.01）を超えたBBox数,4]
         BBox情報。
     scores :[確信度閾値（0.01）を超えたBBox数]
         confの情報
-
     Returns
     -------
     keep : リスト
@@ -368,7 +360,7 @@ def nm_suppression(boxes, scores, overlap=0.45, top_k=200):
 
         # IoU = intersect部分 / (area(a) + area(b) - intersect部分)の計算
         rem_areas = torch.index_select(area, 0, idx)  # 各BBoxの元の面積
-        union = (rem_areas - inter) + area[i]  # 2つのエリアの和（OR）の面積
+        union = (rem_areas - inter) + area[i]  # 2つのエリアのANDの面積
         IoU = inter/union
 
         # IoUがoverlapより小さいidxのみを残す
@@ -398,7 +390,6 @@ class Detect(Function):
     def forward(self, loc_data, conf_data, dbox_list):
         """
         順伝搬の計算を実行する。
-
         Parameters
         ----------
         loc_data:  [batch_num,8732,4]
@@ -407,7 +398,6 @@ class Detect(Function):
             検出の確信度。
         dbox_list: [8732,4]
             DBoxの情報
-
         Returns
         -------
         output : torch.Size([batch_num, 21, 200, 5])
