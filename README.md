@@ -1,4 +1,4 @@
-# SSD_object_detection
+# torch_object_detection
 
 ### Pytorchで物体検出(SSD)
 
