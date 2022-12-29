@@ -18,27 +18,23 @@ class MultiBoxLoss(nn.Module):
         super(MultiBoxLoss, self).__init__()
         self.jaccard_thresh = jaccard_thresh  # 0.5 関数matchのjaccard係数の閾値
         self.negpos_ratio = neg_pos  # 3:1 Hard Negative Miningの負と正の比率
-        self.device = device  # CPUとGPUのいずれで計算するのか   
+        self.device = device  # CPUとGPUのいずれで計算するのか
 
     def forward(self, predictions, targets):
         """
         損失関数の計算。
-
         Parameters
         ----------
         predictions : SSD netの訓練時の出力(tuple)
             (loc=torch.Size([num_batch, 8732, 4]), conf=torch.Size([num_batch, 8732, 21]), dbox_list=torch.Size [8732,4])。
-
         targets : [num_batch, num_objs, 5]
             5は正解のアノテーション情報[xmin, ymin, xmax, ymax, label_ind]を示す
-
         Returns
         -------
         loss_l : テンソル
             locの損失の値
         loss_c : テンソル
             confの損失の値
-
         """
 
         # SSDモデルの出力がタプルになっているので、個々にばらす
@@ -123,7 +119,7 @@ class MultiBoxLoss(nn.Module):
         _, idx_rank = loss_idx.sort(1)
 
         # （注釈）
-        # 実装コードが特殊で直感的ではないです。
+        # 実装コードがかなり特殊で直感的ではないです。
         # 上記2行は、要は各DBoxに対して、損失の大きさが何番目なのかの情報を
         # 変数idx_rankとして高速に取得したいというコードです。
         #
