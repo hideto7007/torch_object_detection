@@ -23,7 +23,7 @@ import torch.utils.data as data
 from dataset.dataset import make_datapath_list, Anno_xml2list, DataTransform, VOCDataset, od_collate_fn
 from config import Config
 from common.common import img_show
-from models.SSD_model import SSD
+from models.ssd_model import SSD
 from models.loss_function import MultiBoxLoss
 
 
