@@ -92,9 +92,9 @@ net = SSD(phase="train", cfg=config.ssd_cfg)
 # SSDの初期の重みを設定
 
 # loadデータ
-load_list = ['./weights/vgg16_reducedfc.pth', './weights/ssd300_50.pth', './weights/ssd300_mAP_77.43_v2.pth']
+load_list = './weights/vgg16_reducedfc.pth'
 
-vgg_weights = torch.load(load_list[0])
+vgg_weights = torch.load(load_list)
 net.vgg.load_state_dict(vgg_weights)
 
 
