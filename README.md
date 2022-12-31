@@ -4,6 +4,7 @@
 
 - version
   - torch 1.13.0
+  - torchvision 0.14.1
 
 
 ### 仮想環境
