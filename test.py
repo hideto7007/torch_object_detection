@@ -42,7 +42,7 @@ net = SSD(phase="inference", cfg=config.ssd_cfg)
 net.eval()
 
 # SSDの学習済みの重みを設定
-net_weights = torch.load('./weights/ssd300_10.pth', map_location={'cuda:0': 'cpu'})
+net_weights = torch.load('./weights/ssd300_mAP_77.43_v2.pth', map_location={'cuda:0': 'cpu'})
 
 #net_weights = torch.load('./weights/ssd300_mAP_77.43_v2.pth', map_location={'cuda:0': 'cpu'})
 
