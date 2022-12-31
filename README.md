@@ -9,6 +9,7 @@
 
 ### 仮想環境
 - 仮想環境作成時の参考
+  - python -m venv .venv
   - source env/Scripts/activate
   - pip install -r requirements.txt
 
