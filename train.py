@@ -41,12 +41,6 @@ transform_anno = Anno_xml2list(config.voc_classes)
 # ファイルパスのリストを作成
 train_img_list, train_anno_list, val_img_list, val_anno_list = make_datapath_list(config.path)
 
-# アノテーションをリストに
-transform_anno = Anno_xml2list(config.voc_classes)
-
-# 前処理クラスの作成
-transform = DataTransform(config.input_size, config.mean)
-
 if config.img_flg:
     img_show()
     
