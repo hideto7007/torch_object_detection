@@ -164,3 +164,6 @@ class SSDPredictShow():
             # 長方形の枠の左上にラベルを描画する
             currentAxis.text(xy[0], xy[1], display_txt, bbox={
                              'facecolor': color, 'alpha': 0.5})
+            
+            print("確認")
+            plt.show()

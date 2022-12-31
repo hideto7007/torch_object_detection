@@ -3,6 +3,8 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
 
 
 # 機械学習ライブラリ
@@ -55,16 +57,14 @@ print('ネットワーク設定完了：学習済みの重みをロードしま�
 # 結果の描画
 ssd = SSDPredictShow(img_list=train_img_list, dataset=train_dataset, eval_categories=config.voc_classes,
                      net=net, dataconfidence_level=0.6)
-img_index = 0
+img_index = 10
 ssd.show(img_index, "predict")
 ssd.show(img_index, "ans")
 
 
 # 結果の描画
-"""
 ssd = SSDPredictShow(img_list=val_img_list, dataset=val_dataset, eval_categories=config.voc_classes,
                      net=net, dataconfidence_level=0.6)
-img_index = 0
+img_index = 10
 ssd.show(img_index, "predict")
 ssd.show(img_index, "ans")
-"""

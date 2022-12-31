@@ -56,8 +56,9 @@ def ssd_predict(img_index, img_list, dataset, net=None, dataconfidence_level=0.5
     predict_bbox = []
     pre_dict_label_index = []
     scores = []
+    #detections = detections.to('cpu').detach().numpy().copy()
     detections = detections.cpu().detach().numpy()
-
+    
     # 条件以上の値を抽出
     find_index = np.where(detections[:, 0:, :, 0] >= dataconfidence_level)
     detections = detections[find_index]
@@ -136,6 +137,8 @@ def vis_bbox(rgb_img, bbox, label_index, scores, label_names):
         currentAxis.text(xy[0], xy[1], display_txt, bbox={
                          'facecolor': color, 'alpha': 0.5})
         
+        plt.show()
+        
         
 class SSDPredictShow():
     """SSDでの予測と画像の表示をまとめて行うクラス"""
@@ -166,7 +169,6 @@ class SSDPredictShow():
                                                                  self.dataset,
                                                                  self.net,
                                                                  self.dataconfidence_level)
-
         if predict_or_ans == "predict":
             vis_bbox(rgb_img, bbox=predict_bbox, label_index=pre_dict_label_index,
                      scores=scores, label_names=self.eval_categories)
